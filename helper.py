@@ -27,7 +27,7 @@ def basic_stats(df, measure, agg='sum'):
     """
     Reports the total, sizes, and proportions of the measure by closure status.
 
-    :param df: a pandas DataFrame
+    :param df: a pandas DataFrame containing a 'Closed 2012-2016' column
     :param measure: a string column name of numeric data to report stats on
     :param agg: a string indicating how to aggregate the measure and groups
     """
@@ -57,7 +57,7 @@ def count_stats(df, measure):
     measure by closure status and compares their distributions using an
     Independent 2-Sample t-Test and a Mann-Whitney U Rank Test for significance.
 
-    :param df: a pandas DataFrame
+    :param df: a pandas DataFrame containing a 'Closed 2012-2016' column
     :param measure: a string column name of numeric data to report stats on
     """
     # Group by closure status.
@@ -72,12 +72,12 @@ def count_stats(df, measure):
     # Report results.
     print(measure + '\n' + ''.join(['-' for i in range(len(measure))]))
     print('Total:\t\t{:,.3f}'.format(df[measure].sum()))
-    print('Open:\t\tmean={:,.3f}\tmedian={:,.3f}\t({:,.3f}-{:,.3f})'\
+    print('Open:\t\tmean={:,.3f}\tmedian={:,.3f}\t({:,.3f} - {:,.3f})'\
           .format(open.mean(), open.median(), open.min(), open.max()))
-    print('Closed:\t\tmean={:,.3f}\tmedian={:,.3f}\t({:,.3f}-{:,.3f})'\
+    print('Closed:\t\tmean={:,.3f}\tmedian={:,.3f}\t({:,.3f} - {:,.3f})'\
           .format(closed.mean(), closed.median(), closed.min(), closed.max()))
-    print('2-Samp t-Test:\tpval={:.6f}'.format(pval_t))
-    print('Mann-Whit Test:\tpval={:.6f}'.format(pval_mw))
+    print('2-Samp t-Test:\tpval={:.9f}'.format(pval_t))
+    print('Mann-Whit Test:\tpval={:.9f}'.format(pval_mw))
 
 
 def proportion_stats(df, numer_measure, denom_measure):
@@ -88,7 +88,7 @@ def proportion_stats(df, numer_measure, denom_measure):
     and maximums of the Proportion, using an Independent 2-Sample t-Test and a
     Mann-Whitney U Rank Test for significance.
 
-    :param df: a pandas DataFrame
+    :param df: a pandas DataFrame containing a 'Closed 2012-2016' column
     :param numer_measure: a string column name of numeric data to treat as the
                           Proportion's numerator
     :param denom_measure: a string column name of numeric data to treat as the
@@ -109,24 +109,30 @@ def proportion_stats(df, numer_measure, denom_measure):
     print('% ' + numer_measure)
     print(''.join(['-' for i in range(len(numer_measure) + 2)]))
     print('Total:\t\t{:,.3f}'.format(prop_df[numer_measure].sum()))
-    print('Open:\t\tmean={:,.3f}\tmedian={:,.3f}\t({:,.3f}-{:,.3f})'\
+    print('Open:\t\tmean={:,.3f}%\tmedian={:,.3f}%\t({:,.3f}% - {:,.3f}%)'\
           .format(open.mean(), open.median(), open.min(), open.max()))
-    print('Closed:\t\tmean={:,.3f}\tmedian={:,.3f}\t({:,.3f}-{:,.3f})'\
+    print('Closed:\t\tmean={:,.3f}%\tmedian={:,.3f}%\t({:,.3f}% - {:,.3f}%)'\
           .format(closed.mean(), closed.median(), closed.min(), closed.max()))
-    print('2-Samp t-Test:\tpval={:.6f}'.format(pval_t))
-    print('Mann-Whit Test:\tpval={:.6f}'.format(pval_mw))
+    print('2-Samp t-Test:\tpval={:.9f}'.format(pval_t))
+    print('Mann-Whit Test:\tpval={:.9f}'.format(pval_mw))
 
 
-def odds_ratio(df_ind1, df_ind2):
+def two_by_two(df, ind1, ind2):
     """
-    Reports the odds ratio and significance of a 2x2 contingency table with
-    the given independent variables against LDU closure status.
+    Reports the values of a 2x2 contingency table with the given independent
+    variables against LDU closure status. Used as input to the OpenEpi
+    calculator which has both Fisher exact tests and Mantel-Haenszel ratios.
 
-    :param df_ind1: a pandas DataFrame containing closure status and the first
-                    independent variable
-    :param df_ind2: a pandas DataFrame containing closure status and the second
-                    independent variable
+    :param df: a pandas DataFrame containing a 'Closed 2012-2016' column
+    :param ind1: a string column name of the first independent variable
+    :param ind2: a string column name of the second independent variable
     """
+    # Group by closure status.
+    gb = df.groupby('Closed 2012-2016')
+    open, closed = gb.get_group(0), gb.get_group(1)
 
-
-    odds, pval = ss.fisher_exact([[ind1dep1, ind1dep2], [ind2dep1, ind2dep2]])
+    # Print the 2x2 contingency table data.
+    print(ind1 + ', Closed: {:,.1f}'.format(closed[ind1].sum()))
+    print(ind2 + ', Closed: {:,.1f}'.format(closed[ind2].sum()))
+    print(ind1 + ', Open: {:,.1f}'.format(open[ind1].sum()))
+    print(ind2 + ', Open: {:,.1f}'.format(open[ind2].sum()))
