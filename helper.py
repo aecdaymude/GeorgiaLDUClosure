@@ -162,4 +162,5 @@ def plot_medians(labels, openvals, closedvals, pvals, barwidth=0.25, fmt='{}', \
     ax.legend()
 
     # Save the figure.
+    fig.patch.set_facecolor('white')
     fig.savefig(osp.join('figs', 'medians' + anno + '.png'))
